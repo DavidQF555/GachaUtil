@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class GenshinImpact {
 
     public static void main(String[] args) {
-        System.out.println("What is the chance of rolling 5 star characters?");
+        System.out.println("What is the chance of rolling a 5 star character? (Default: 0.6%)");
         Scanner sc = new Scanner(System.in);
         double rate = stringToRate(sc.nextLine());
         if (rate < 0) {
@@ -13,8 +13,8 @@ public class GenshinImpact {
         } else {
             System.out.println("How many times do you roll?");
             try {
-                int amt = Integer.parseInt(sc.nextLine());
-                System.out.println("There is a " + rateToRoundedPercent(1 - getFailRate(rate, amt, 1, 0), 2) + " to get a banner character");
+                int rolls = Integer.parseInt(sc.nextLine());
+                System.out.println("There is a " + rateToRoundedPercent(1 - getFailRate(rate, rolls, 1, 0), 2) + " chance to roll a 5 star banner character");
             } catch (NumberFormatException e) {
                 System.out.println("Invalid amount");
             }
@@ -23,11 +23,14 @@ public class GenshinImpact {
 
     public static double getFailRate(double rate, int total, int roll, int lastFiveStar) {
         if (roll - lastFiveStar == 90) {
+            double fail = 0;
             if (lastFiveStar == 0) {
-                return 0.5 * getFailRate(rate, total, roll + 1, roll);
-            } else {
-                return 0;
+                fail = 0.5;
+                if (roll < total) {
+                    fail *= getFailRate(rate, total, roll + 1, roll);
+                }
             }
+            return fail;
         } else if (roll < total) {
             double fail = (1 - rate) * getFailRate(rate, total, roll + 1, lastFiveStar);
             if (lastFiveStar == 0) {
